@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
 )
 
 func main() {
@@ -23,15 +22,28 @@ func main() {
 	}
 
 	// Uncomment this block to pass the first stage
-	
+
 	filename := os.Args[2]
 	fileContents, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	if len(fileContents) > 0 {
+		content := string(fileContents)
+		for _, char := range content {
+			switch char {
+			case '(':
+				fmt.Println("LEFT_PAREN ( null")
+
+			case ')':
+				fmt.Println("RIGHT_PAREN ) null")
+
+			default:
+				fmt.Printf("Unknown character: %c", char)
+			}
+		}
 		// text := string(fileContents)
 		// fmt.Println(mime.QEncoding.Encode("utf-8",fileContents))
 		// fmt.Println(text)
