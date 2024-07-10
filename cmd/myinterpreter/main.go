@@ -7,6 +7,8 @@ import (
 
 func main() {
 
+	hasError := false
+
 	singleTokens := map[rune]string{
 		'(': "LEFT_PAREN",
 		')': "RIGHT_PAREN",
@@ -45,16 +47,23 @@ func main() {
 
 	if len(fileContents) > 0 {
 		content := string(fileContents)
+		count := 1
 		for _, token := range content {
-
+			if token == '\n' {
+				count++
+			}
 			if value, ok := singleTokens[token]; ok {
 				fmt.Printf("%s %c null\n", value, token)
+			} else {
+				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", count, token)
+				hasError = true
 			}
 		}
 
-		fmt.Println("EOF  null")
-	} else {
-		fmt.Println("EOF  null")
+	}
+	fmt.Println("EOF  null")
+	if hasError {
+		os.Exit(65)
 	}
 }
 
