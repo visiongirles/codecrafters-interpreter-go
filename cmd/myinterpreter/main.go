@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+
 )
 
 func main() {
@@ -22,17 +23,27 @@ func main() {
 	}
 
 	// Uncomment this block to pass the first stage
-	//
-	// filename := os.Args[2]
-	// fileContents, err := os.ReadFile(filename)
-	// if err != nil {
-	// 	fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
-	// 	os.Exit(1)
-	// }
-	//
-	// if len(fileContents) > 0 {
-	// 	panic("Scanner not implemented")
-	// } else {
-	// 	fmt.Println("EOF  null") // Placeholder, remove this line when implementing the scanner
-	// }
+	
+	filename := os.Args[2]
+	fileContents, err := os.ReadFile(filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
+		os.Exit(1)
+	}
+	
+	if len(fileContents) > 0 {
+		// text := string(fileContents)
+		// fmt.Println(mime.QEncoding.Encode("utf-8",fileContents))
+		// fmt.Println(text)
+		fmt.Println("EOF  null")
+	} else {
+
+	
+		// fmt.Println("EOF  null") // Placeholder, remove this line when implementing the scanner
+	}
 }
+
+// <token_type> <lexeme> <literal>
+// token_type VAR, IDENTIFIER, STRING, EOF
+// lexeme - string itself
+// literal -   The literal value of the token: string/ number === string/number, other== = null
