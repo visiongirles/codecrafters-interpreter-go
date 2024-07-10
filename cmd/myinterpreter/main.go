@@ -37,9 +37,7 @@ func main() {
 		// fmt.Println(text)
 		fmt.Println("EOF  null")
 	} else {
-
-	
-		// fmt.Println("EOF  null") // Placeholder, remove this line when implementing the scanner
+		fmt.Println("EOF  null")
 	}
 }
 
