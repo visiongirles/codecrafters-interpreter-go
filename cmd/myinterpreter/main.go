@@ -39,7 +39,6 @@ func main() {
 		'+': "PLUS",
 		';': "SEMICOLON",
 		'*': "STAR",
-		'/': "SLASH",
 	}
 
 	operators := map[rune]string{
@@ -78,22 +77,25 @@ func main() {
 	if len(fileContents) > 0 {
 		content := string(fileContents)
 		count := 1
+
 		for index := 0; index < len(content); index++ {
+			isNextTokenAlsoEqual := index+1 < len(content) && content[index+1] == '='
+			isNextTokenAlsoSlash := index+1 < len(content) && content[index+1] == '/'
+			var tokenType string
+			var lexeme string
 			token := rune(content[index])
+
 			if token == '\n' {
 				count++
 			}
 			if value, ok := singleTokens[token]; ok {
 				fmt.Printf("%s %c null\n", value, token)
 			} else if _, ok := operators[token]; ok {
-				var tokenType string
-				var lexeme string
-				isNextTokenAlsoEqual := index+1 < len(content) && content[index+1] == '='
 
 				switch token {
 				case '=':
 					{
-						tokenType = "EQUAL"
+						tokenType = operators[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -102,7 +104,7 @@ func main() {
 					}
 				case '!':
 					{
-						tokenType = "BANG"
+						tokenType = operators[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -111,7 +113,7 @@ func main() {
 					}
 				case '<':
 					{
-						tokenType = "LESS"
+						tokenType = operators[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -120,7 +122,7 @@ func main() {
 					}
 				case '>':
 					{
-						tokenType = "GREATER"
+						tokenType = operators[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -128,7 +130,24 @@ func main() {
 						}
 					}
 				}
+
+				// Comment
+
 				fmt.Printf("%s %s null\n", tokenType, lexeme)
+			} else if token == '/' {
+				if isNextTokenAlsoSlash {
+					for {
+						if content[index] == '\n' || index == len(content)-1 {
+							break
+						}
+						index++
+					}
+				} else {
+					tokenType = "SLASH"
+					lexeme = string(token)
+					fmt.Printf("%s %s null\n", tokenType, lexeme)
+
+				}
 			} else {
 				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", count, token)
 				hasError = true
