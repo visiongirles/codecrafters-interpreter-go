@@ -142,6 +142,7 @@ func main() {
 				if isNextTokenAlsoSlash {
 					for {
 						if content[index] == '\n' || index == len(content)-1 {
+							count++
 							break
 						}
 						index++
@@ -157,7 +158,6 @@ func main() {
 				hasError = true
 			}
 		}
-
 	}
 	fmt.Println("EOF  null")
 	if hasError {
