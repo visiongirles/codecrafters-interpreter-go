@@ -25,7 +25,9 @@ func buildResponse(token rune, tokenT string, content string, index int) (tokenT
 }
 
 func main() {
-
+	const whitespace = ' '
+	const horTab = '\t'
+	const verTab = '\v'
 	hasError := false
 
 	singleTokens := map[rune]string{
@@ -43,13 +45,9 @@ func main() {
 
 	operators := map[rune]string{
 		'=': "EQUAL",
-		// "==": "EQUAL_EQUAL",
 		'!': "BANG",
-		// "!=": "BANG_EQUAL",
 		'<': "LESS",
-		// "<=": "LESS_EQUAL",
 		'>': "GREATER",
-		// ">=": "GREATER_EQUAL",
 	}
 
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -87,7 +85,13 @@ func main() {
 
 			if token == '\n' {
 				count++
+				continue
 			}
+
+			if token == whitespace || token == horTab || token == verTab {
+				continue
+			}
+
 			if value, ok := singleTokens[token]; ok {
 				fmt.Printf("%s %c null\n", value, token)
 			} else if _, ok := operators[token]; ok {
