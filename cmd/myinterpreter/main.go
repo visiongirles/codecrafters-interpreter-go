@@ -18,6 +18,12 @@ import (
 // 	RuneValue   rune
 // }
 
+func buildResponse(token rune, tokenT string, content string, index int) (tokenType string, lexeme string) {
+	tokenType = tokenT + "_EQUAL"
+	lexeme = string(token) + string(content[index+1])
+	return
+}
+
 func main() {
 
 	hasError := false
@@ -82,26 +88,27 @@ func main() {
 			} else if _, ok := operators[token]; ok {
 				var tokenType string
 				var lexeme string
+				isNextTokenAlsoEqual := index+1 < len(content) && content[index+1] == '='
+
 				switch token {
 				case '=':
 					{
 						tokenType = "EQUAL"
 						lexeme = string(token)
-						if index+1 < len(content) && content[index+1] == '=' {
-							// fmt.Printf("index+1: %d content[index+1]: %s ", index+1, string(content[index+1]))
-							tokenType = "EQUAL_EQUAL"
-							lexeme = string(token) + string(content[index+1])
+						if isNextTokenAlsoEqual {
+							// tokenType += "_EQUAL"
+							// lexeme = string(token) + string(content[index+1])
+							tokenType, lexeme = buildResponse(token, tokenType, content, index)
 							index++
 						}
 					}
-
 				case '!':
 					{
 						tokenType = "BANG"
 						lexeme = string(token)
-						if index+1 < len(content) && content[index+1] == '=' {
+						if isNextTokenAlsoEqual {
 							// fmt.Printf("index+1: %d content[index+1]: %s ", index+1, string(content[index+1]))
-							tokenType = "BANG_EQUAL"
+							tokenType += "_EQUAL"
 							lexeme = string(token) + string(content[index+1])
 							index++
 						}
@@ -110,9 +117,9 @@ func main() {
 					{
 						tokenType = "LESS"
 						lexeme = string(token)
-						if index+1 < len(content) && content[index+1] == '=' {
+						if isNextTokenAlsoEqual {
 							// fmt.Printf("index+1: %d content[index+1]: %s ", index+1, string(content[index+1]))
-							tokenType = "LESS_EQUAL"
+							tokenType += "_EQUAL"
 							lexeme = string(token) + string(content[index+1])
 							index++
 						}
@@ -121,9 +128,9 @@ func main() {
 					{
 						tokenType = "GREATER"
 						lexeme = string(token)
-						if index+1 < len(content) && content[index+1] == '=' {
+						if isNextTokenAlsoEqual {
 							// fmt.Printf("index+1: %d content[index+1]: %s ", index+1, string(content[index+1]))
-							tokenType = "GREATER_EQUAL"
+							tokenType += "_EQUAL"
 							lexeme = string(token) + string(content[index+1])
 							index++
 						}
