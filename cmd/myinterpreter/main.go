@@ -96,8 +96,6 @@ func main() {
 						tokenType = "EQUAL"
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
-							// tokenType += "_EQUAL"
-							// lexeme = string(token) + string(content[index+1])
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
 							index++
 						}
@@ -107,9 +105,7 @@ func main() {
 						tokenType = "BANG"
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
-							// fmt.Printf("index+1: %d content[index+1]: %s ", index+1, string(content[index+1]))
-							tokenType += "_EQUAL"
-							lexeme = string(token) + string(content[index+1])
+							tokenType, lexeme = buildResponse(token, tokenType, content, index)
 							index++
 						}
 					}
@@ -118,9 +114,7 @@ func main() {
 						tokenType = "LESS"
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
-							// fmt.Printf("index+1: %d content[index+1]: %s ", index+1, string(content[index+1]))
-							tokenType += "_EQUAL"
-							lexeme = string(token) + string(content[index+1])
+							tokenType, lexeme = buildResponse(token, tokenType, content, index)
 							index++
 						}
 					}
@@ -129,9 +123,7 @@ func main() {
 						tokenType = "GREATER"
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
-							// fmt.Printf("index+1: %d content[index+1]: %s ", index+1, string(content[index+1]))
-							tokenType += "_EQUAL"
-							lexeme = string(token) + string(content[index+1])
+							tokenType, lexeme = buildResponse(token, tokenType, content, index)
 							index++
 						}
 					}
