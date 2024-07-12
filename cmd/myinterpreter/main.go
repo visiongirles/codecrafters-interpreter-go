@@ -76,6 +76,25 @@ func main() {
 		'"': "STRING",
 	}
 
+	reservedWordTokens := map[string]string{
+		"and":    "AND",
+		"class":  "CLASS",
+		"else":   "ELSE",
+		"false":  "FALSE",
+		"for":    "FOR",
+		"fun":    "FUN",
+		"if":     "IF",
+		"nil":    "NIL",
+		"or":     "OR",
+		"print":  "PRINT",
+		"return": "RETURN",
+		"super":  "SUPER",
+		"this":   "THIS",
+		"true":   "TRUE",
+		"var":    "VAR",
+		"while":  "WHILE",
+	}
+
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
 
@@ -234,7 +253,7 @@ func main() {
 					fmt.Printf("%s %s %.1f\n", tokenType, lexeme, floatValue)
 				}
 			} else if isAlpha(token) {
-				tokenType = "IDENTIFIER"
+
 				lexeme += string(token)
 				index++
 				for {
@@ -251,7 +270,12 @@ func main() {
 					}
 
 				}
-				fmt.Printf("%s %s null\n", tokenType, lexeme)
+				if tokenType, ok := reservedWordTokens[lexeme]; ok {
+					fmt.Printf("%s %s null\n", tokenType, lexeme)
+				} else {
+					tokenType = "IDENTIFIER"
+					fmt.Printf("%s %s null\n", tokenType, lexeme)
+				}
 
 			} else {
 				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", count, token)
