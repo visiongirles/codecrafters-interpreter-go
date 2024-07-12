@@ -5,19 +5,6 @@ import (
 	"os"
 )
 
-// type OperatorType int
-
-// const (
-// 	StringType OperatorType = iota
-// 	RuneType
-// )
-
-// type OperatorValue struct {
-// 	Type        OperatorType
-// 	StringValue string
-// 	RuneValue   rune
-// }
-
 func buildResponse(token rune, tokenT string, content string, index int) (tokenType string, lexeme string) {
 	tokenType = tokenT + "_EQUAL"
 	lexeme = string(token) + string(content[index+1])
@@ -25,9 +12,7 @@ func buildResponse(token rune, tokenT string, content string, index int) (tokenT
 }
 
 func main() {
-	const whitespace = ' '
-	const horTab = '\t'
-	const verTab = '\v'
+
 	hasError := false
 
 	singleTokens := map[rune]string{
@@ -43,11 +28,22 @@ func main() {
 		'*': "STAR",
 	}
 
-	operators := map[rune]string{
+	operatorTokens := map[rune]string{
 		'=': "EQUAL",
 		'!': "BANG",
 		'<': "LESS",
 		'>': "GREATER",
+	}
+
+	// runeLiteralTokens:= []rune{' ', '\t', '\v'}
+	runeLiteralTokens := map[rune]string{
+		' ':  "WHITESPACE",
+		'\t': "HORIZONTAL TAB",
+		'\v': "VERTICAL TAB",
+	}
+
+	stringTokens := map[rune]string{
+		'"': "STRING",
 	}
 
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -88,18 +84,16 @@ func main() {
 				continue
 			}
 
-			if token == whitespace || token == horTab || token == verTab {
+			if _, ok := runeLiteralTokens[token]; ok {
 				continue
 			}
-
 			if value, ok := singleTokens[token]; ok {
 				fmt.Printf("%s %c null\n", value, token)
-			} else if _, ok := operators[token]; ok {
-
+			} else if _, ok := operatorTokens[token]; ok {
 				switch token {
 				case '=':
 					{
-						tokenType = operators[token]
+						tokenType = operatorTokens[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -108,7 +102,7 @@ func main() {
 					}
 				case '!':
 					{
-						tokenType = operators[token]
+						tokenType = operatorTokens[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -117,7 +111,7 @@ func main() {
 					}
 				case '<':
 					{
-						tokenType = operators[token]
+						tokenType = operatorTokens[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -126,7 +120,7 @@ func main() {
 					}
 				case '>':
 					{
-						tokenType = operators[token]
+						tokenType = operatorTokens[token]
 						lexeme = string(token)
 						if isNextTokenAlsoEqual {
 							tokenType, lexeme = buildResponse(token, tokenType, content, index)
@@ -134,9 +128,6 @@ func main() {
 						}
 					}
 				}
-
-				// Comment
-
 				fmt.Printf("%s %s null\n", tokenType, lexeme)
 			} else if token == '/' {
 				if isNextTokenAlsoSlash {
@@ -153,6 +144,27 @@ func main() {
 					fmt.Printf("%s %s null\n", tokenType, lexeme)
 
 				}
+			} else if tokenType, ok := stringTokens[token]; ok {
+				index++
+				var lexeme string
+				hasStringError := false
+				for {
+					if content[index] == '"' {
+						break
+					}
+					if index == len(content)-1 {
+						fmt.Fprintf(os.Stderr, "[line %d] Error: Unterminated string.\n", count)
+						hasStringError = true
+						hasError = true
+						break
+					}
+					lexeme += string(content[index])
+					index++
+				}
+				if !hasStringError {
+					fmt.Printf("%s \"%s\" %s\n", tokenType, lexeme, lexeme)
+				}
+
 			} else {
 				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", count, token)
 				hasError = true
