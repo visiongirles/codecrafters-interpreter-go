@@ -13,8 +13,32 @@ func buildResponse(token rune, tokenT string, content string, index int) (tokenT
 }
 
 func isDigit(token rune) bool {
-
 	return token >= '0' && token <= '9'
+}
+
+func isAlpha(token rune) bool {
+	return (token >= 'a' && token <= 'z') ||
+		(token >= 'A' && token <= 'Z') ||
+		token == '_'
+}
+
+func isAlphaNumeric(token rune) bool {
+	return isDigit(token) || isAlpha(token)
+}
+
+func hasTrailingZeros(lexeme string) string {
+	for {
+		if (lexeme[len(lexeme)-1]) == '0' {
+			if (lexeme[len(lexeme)-2]) == '.' {
+				break
+			} else {
+				lexeme = lexeme[:len(lexeme)-1]
+			}
+		} else {
+			break
+		}
+	}
+	return lexeme
 }
 
 func main() {
@@ -202,12 +226,33 @@ func main() {
 						fmt.Printf("%s %s %.1f\n", tokenType, lexeme, floatValue)
 						index = index - 2
 					} else {
-						fmt.Printf("%s %s %s\n", tokenType, lexeme, lexeme)
+						stringLitral := hasTrailingZeros(lexeme)
+						fmt.Printf("%s %s %s\n", tokenType, lexeme, stringLitral)
 					}
 				} else {
 					floatValue, _ := strconv.ParseFloat(lexeme, 64)
 					fmt.Printf("%s %s %.1f\n", tokenType, lexeme, floatValue)
 				}
+			} else if isAlpha(token) {
+				tokenType = "IDENTIFIER"
+				lexeme += string(token)
+				index++
+				for {
+					if index < len(content) {
+						if isAlphaNumeric(rune(content[index])) {
+							lexeme += string(content[index])
+							index++
+						} else {
+							index--
+							break
+						}
+					} else {
+						break
+					}
+
+				}
+				fmt.Printf("%s %s null\n", tokenType, lexeme)
+
 			} else {
 				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", count, token)
 				hasError = true
