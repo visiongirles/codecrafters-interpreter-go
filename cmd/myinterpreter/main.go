@@ -3,12 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func buildResponse(token rune, tokenT string, content string, index int) (tokenType string, lexeme string) {
 	tokenType = tokenT + "_EQUAL"
 	lexeme = string(token) + string(content[index+1])
 	return
+}
+
+func isDigit(token rune) bool {
+
+	return token >= '0' && token <= '9'
 }
 
 func main() {
@@ -83,7 +89,6 @@ func main() {
 				count++
 				continue
 			}
-
 			if _, ok := runeLiteralTokens[token]; ok {
 				continue
 			}
@@ -164,7 +169,45 @@ func main() {
 				if !hasStringError {
 					fmt.Printf("%s \"%s\" %s\n", tokenType, lexeme, lexeme)
 				}
-
+			} else if isDigit(token) {
+				tokenType = "NUMBER"
+				lexeme += string(token)
+				index++
+				hasDot := false
+				for {
+					if index < len(content) {
+						if isDigit(rune(content[index])) {
+							lexeme += string(content[index])
+							index++
+							// fmt.Printf("lexeme: %s\n", lexeme)
+							continue
+						}
+						if content[index] == '.' && !hasDot {
+							hasDot = true
+							lexeme += string(content[index])
+							index++
+							continue
+						} else {
+							index--
+							break
+						}
+					} else {
+						break
+					}
+				}
+				if hasDot {
+					if lexeme[len(lexeme)-1] == '.' {
+						lexeme = lexeme[:len(lexeme)-1]
+						floatValue, _ := strconv.ParseFloat(lexeme, 64)
+						fmt.Printf("%s %s %.1f\n", tokenType, lexeme, floatValue)
+						index = index - 2
+					} else {
+						fmt.Printf("%s %s %s\n", tokenType, lexeme, lexeme)
+					}
+				} else {
+					floatValue, _ := strconv.ParseFloat(lexeme, 64)
+					fmt.Printf("%s %s %.1f\n", tokenType, lexeme, floatValue)
+				}
 			} else {
 				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", count, token)
 				hasError = true
