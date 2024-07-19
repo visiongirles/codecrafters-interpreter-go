@@ -18,3 +18,14 @@ var ReservedWordTokens = map[string]TokenType{
 	"var":    VAR,
 	"while":  WHILE,
 }
+
+const (
+	OK          = 0
+	InputError  = 1
+	SyntaxError = 65
+)
+
+const (
+	tokenize = "tokenize"
+	parse    = "parse"
+)
