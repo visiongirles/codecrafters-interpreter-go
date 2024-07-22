@@ -34,6 +34,38 @@ func (l NumberExpression) String() string {
 	return l.token.literal
 }
 
+type StringExpression struct {
+	token Token
+}
+
+func (l StringExpression) String() string {
+	return l.token.literal
+}
+
+type TrueExpression struct {
+	token Token
+}
+
+func (l TrueExpression) String() string {
+	return l.token.lexeme
+}
+
+type FalseExpression struct {
+	token Token
+}
+
+func (l FalseExpression) String() string {
+	return l.token.lexeme
+}
+
+type NilExpression struct {
+	token Token
+}
+
+func (l NilExpression) String() string {
+	return l.token.lexeme
+}
+
 type Primitive int
 
 const (
@@ -72,13 +104,15 @@ func (p *Parser) parseToken() ASTNode {
 	// fmt.Printf("[Parser parseToken()]. Token %s has not implemented\n", token.typeToken.String())
 	switch token.typeToken {
 	case TRUE:
-		return LiteralExpression{value: truePrimitive}
+		return TrueExpression{token: token}
 	case FALSE:
-		return LiteralExpression{value: falsePrimitive}
+		return FalseExpression{token: token}
 	case NIL:
-		return LiteralExpression{value: nilPrimitive}
+		return NilExpression{token: token}
 	case NUMBER:
 		return NumberExpression{token: token}
+	case STRING:
+		return StringExpression{token: token}
 	default:
 		fmt.Printf("[Parser parseToken()] default. Token %s has not implemented", token.lexeme)
 	}
