@@ -5,7 +5,6 @@ import "fmt"
 type Parser struct {
 	tokens  []Token
 	current int
-	result  LiteralExpression
 }
 
 type NodeType string
@@ -25,6 +24,14 @@ type LiteralExpression struct {
 
 func (l LiteralExpression) String() string {
 	return l.value.String()
+}
+
+type NumberExpression struct {
+	token Token
+}
+
+func (l NumberExpression) String() string {
+	return l.token.literal
 }
 
 type Primitive int
@@ -70,6 +77,8 @@ func (p *Parser) parseToken() ASTNode {
 		return LiteralExpression{value: falsePrimitive}
 	case NIL:
 		return LiteralExpression{value: nilPrimitive}
+	case NUMBER:
+		return NumberExpression{token: token}
 	default:
 		fmt.Printf("[Parser parseToken()] default. Token %s has not implemented", token.lexeme)
 	}
