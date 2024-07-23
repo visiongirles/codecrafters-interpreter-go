@@ -27,16 +27,26 @@ func main() {
 		tokens, err := handleTokenizeCommand(fileContent)
 		if tokens != nil {
 			PrintTokens(tokens)
+
+		}
+		fmt.Println("EOF  null")
+		if err != "" {
+			PrintErrors(err)
+
+			os.Exit(SyntaxError)
+		}
+
+	case parse:
+		expression, err := handleParseCommand(fileContent)
+		if expression != nil {
+			fmt.Printf("%s\n", expression.String())
+
 		}
 
 		if err != "" {
 			PrintErrors(err)
 			os.Exit(SyntaxError)
 		}
-	case parse:
-		expression, _ := handleParseCommand(fileContent)
-		fmt.Printf("%s\n", expression.String())
-
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(InputError)

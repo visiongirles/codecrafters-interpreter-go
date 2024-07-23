@@ -183,8 +183,8 @@ func (s *Scanner) scanTokens() {
 		s.scanToken()
 	}
 
-	newToken := Token{typeToken: EOF, lexeme: "", literal: "null", line: s.line}
-	s.tokens = append(s.tokens, newToken)
+	// newToken := Token{typeToken: EOF, lexeme: "", literal: "null", line: s.line}
+	// s.tokens = append(s.tokens, newToken)
 }
 
 func (s *Scanner) addToken(tokenType TokenType) {
