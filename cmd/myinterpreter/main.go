@@ -7,10 +7,10 @@ import (
 
 func main() {
 
-	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
+	fmt.Fprintln(os.Stderr, "[DEBUG] Logs from your program will appear here!")
 
 	if len(os.Args) < 3 {
-		fmt.Fprintln(os.Stderr, "Usage: ./your_program.sh tokenize <filename>")
+		fmt.Fprintln(os.Stderr, "[DEBUG] Usage: ./your_program.sh tokenize <filename>")
 		os.Exit(InputError)
 	}
 
@@ -18,7 +18,7 @@ func main() {
 	filename := os.Args[2]
 	fileContent, err := os.ReadFile(filename)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
+		fmt.Fprintf(os.Stderr, "[DEBUG] Error reading file: %v\n", err)
 		os.Exit(InputError)
 	}
 
@@ -48,7 +48,7 @@ func main() {
 			os.Exit(SyntaxError)
 		}
 	default:
-		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
+		fmt.Fprintf(os.Stderr, "[DEBUG] Unknown command: %s\n", command)
 		os.Exit(InputError)
 	}
 

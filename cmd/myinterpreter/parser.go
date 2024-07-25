@@ -75,6 +75,20 @@ func (n GroupExpression) String() string {
 	return "(group " + n.expression.String() + ")"
 }
 
+type UnaryExpression struct {
+	operator   TokenType
+	expression ASTNode
+}
+
+func (n UnaryExpression) String() string {
+	if n.operator == BANG {
+		return "(! " + n.expression.String() + ")"
+	} else {
+		return "(- " + n.expression.String() + ")"
+
+	}
+}
+
 type Primitive int
 
 const (
@@ -105,8 +119,7 @@ func (p *Parser) parseTokens() (ASTNode, string) {
 	var node ASTNode
 	err := ""
 
-	fmt.Fprintln(os.Stderr, "Tokens:")
-	fmt.Fprintln(os.Stderr, p.tokens)
+	fmt.Fprintln(os.Stderr, "[DEBUG] Tokens: ", p.tokens)
 
 	for !p.isAtEnd() {
 		node, err = p.parseToken()
@@ -123,7 +136,7 @@ func (p *Parser) parseGroup() (ASTNode, string) {
 	token := p.peek()
 	if token.typeToken == RIGHT_PAREN {
 		p.advance()
-		return nil, "Сразу правая"
+		return nil, "Error: Empty expression."
 	}
 
 	expr, err := p.parseToken()
@@ -142,57 +155,12 @@ func (p *Parser) parseGroup() (ASTNode, string) {
 
 	return expr, err
 
-	// fmt.Fprintf(os.Stderr, "[parseGroup()] token %s \n", token.lexeme)
-	// var expr ASTNode
-	// err := ""
-	// for !p.isAtEnd() && token.typeToken != RIGHT_PAREN {
-	// 	fmt.Fprintf(os.Stderr, "[parseGroup() WHILE] token %s \n", token.lexeme)
-
-	// 	switch token.typeToken {
-	// 	case TRUE:
-	// 		expr = TrueExpression{token: token}
-	// 	case FALSE:
-	// 		expr = FalseExpression{token: token}
-	// 	case NIL:
-	// 		expr = NilExpression{token: token}
-	// 	case NUMBER:
-	// 		expr = NumberExpression{token: token}
-	// 	case STRING:
-	// 		expr = StringExpression{token: token}
-	// 	case LEFT_PAREN:
-	// 		p.stack.Push('(')
-	// 		expr, err = p.parseGroup()
-	// 		// return GroupExpression{expression: expr}, err
-	// 	}
-	// 	token = p.advance()
-	// }
-
-	// fmt.Fprintf(os.Stderr, "[parseGroup() OUTSIDE WHILE] token %s \n", token.lexeme)
-	// if token.typeToken == RIGHT_PAREN {
-	// 	if p.previous().typeToken == LEFT_PAREN {
-	// 		err = "Error: Empty expression"
-	// 		p.advance()
-	// 		return nil, err
-	// 	}
-	// 	if p.stack.Top() == '(' {
-	// 		p.stack.Pop()
-	// 		fmt.Fprintf(os.Stderr, "[parseGroup()] expr %s \n", expr.String())
-	// 		p.advance()
-	// 		return expr, err
-	// 	} else {
-	// 		err = "Error: Unmatched parentheses."
-	// 		p.advance()
-	// 		return nil, err
-	// 	}
-	// }
-
-	// return nil, err
 }
 
 func (p *Parser) parseToken() (ASTNode, string) {
 	token := p.peek()
 	p.advance()
-	fmt.Fprintf(os.Stderr, "[parseToken()]. Token %s\n", token.lexeme)
+	fmt.Fprintf(os.Stderr, "[DEBUG] [parseToken()]. Token %s\n", token.lexeme)
 	switch token.typeToken {
 	case TRUE:
 		return TrueExpression{token: token}, ""
@@ -215,10 +183,23 @@ func (p *Parser) parseToken() (ASTNode, string) {
 		// return nil, ""
 	case RIGHT_PAREN:
 		return nil, "[RIGHT PAREN]Error: Unmatched parentheses."
+
+	case BANG, MINUS:
+		expr, err := p.parseUnary()
+		return UnaryExpression{expression: expr, operator: token.typeToken}, err
 	default:
-		fmt.Fprintf(os.Stderr, "[Parser parseToken()] default. Token %s has not implemented", token.lexeme)
+		fmt.Fprintf(os.Stderr, "[DEBUG] [Parser parseToken()] default. Token %s has not implemented", token.lexeme)
 	}
 	return nil, ""
+}
+
+func (p *Parser) parseUnary() (ASTNode, string) {
+	var expr ASTNode
+	var err string
+
+	expr, err = p.parseToken()
+
+	return expr, err
 }
 
 func (p *Parser) advance() {
