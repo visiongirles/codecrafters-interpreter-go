@@ -76,26 +76,31 @@ func (n GroupExpression) String() string {
 }
 
 type UnaryExpression struct {
-	operator   TokenType
+	operator   Token
 	expression ASTNode
 }
 
-func (n UnaryExpression) String() string {
-	if n.operator == BANG {
-		return "(! " + n.expression.String() + ")"
-	} else {
-		return "(- " + n.expression.String() + ")"
+type BinaryExpression struct {
+	left     ASTNode
+	operator Token
+	right    ASTNode
+}
 
-	}
+func (n BinaryExpression) String() string {
+	return "(" + n.operator.lexeme + " " + n.left.String() + " " + n.right.String() + ")"
+}
+
+func (n UnaryExpression) String() string {
+	return "(" + n.operator.lexeme + " " + n.expression.String() + ")"
 }
 
 type Primitive int
 
-const (
-	nilPrimitive Primitive = iota
-	truePrimitive
-	falsePrimitive
-)
+// const (
+// 	nilPrimitive Primitive = iota
+// 	truePrimitive
+// 	falsePrimitive
+// )
 
 func (p Primitive) String() string {
 	return [...]string{
@@ -116,50 +121,39 @@ func (p *Parser) isAtEnd() bool {
 }
 
 func (p *Parser) parseTokens() (ASTNode, string) {
-	var node ASTNode
-	err := ""
-
-	fmt.Fprintln(os.Stderr, "[DEBUG] Tokens: ", p.tokens)
+	var left ASTNode
+	errMain := ""
 
 	for !p.isAtEnd() {
-		node, err = p.parseToken()
-	}
-
-	if !p.stack.IsEmpty() {
-		return node, "[p.stack.IsEmpty() ]Error: Unmatched parentheses."
-	}
-	return node, err
-}
-
-func (p *Parser) parseGroup() (ASTNode, string) {
-
-	token := p.peek()
-	if token.typeToken == RIGHT_PAREN {
-		p.advance()
-		return nil, "Error: Empty expression."
-	}
-
-	expr, err := p.parseToken()
-	if p.isAtEnd() {
-		err += "Error: Unmatched parentheses."
-		return nil, err
-	}
-	token = p.peek()
-	if token.typeToken == RIGHT_PAREN {
-		if p.stack.Pop() != '(' {
-			err += "[p.stack.Pop() != '(']Error: Unmatched parentheses."
-			return nil, err
+		result, err := p.parseToken()
+		if result == nil {
+			//TODO:
+			// if p.tokens[p.current-1].typeToken == RIGHT_PAREN {
+			if !p.isAtEnd() && p.tokens[p.current].typeToken == RIGHT_PAREN {
+				break
+			} else {
+				return result, err
+			}
 		}
+
+		if binaryExpr, ok := result.(BinaryExpression); ok {
+			fmt.Fprintf(os.Stderr, "[DEBUG] binaryExpr: %s %s\n", binaryExpr.operator.lexeme, binaryExpr.right.String())
+			result = BinaryExpression{left: left, operator: binaryExpr.operator, right: binaryExpr.right}
+			// left = BinaryExpression{left: result, right: nil}
+		}
+		left = result
+		fmt.Fprintf(os.Stderr, "[DEBUG] left: %s\n", left.String())
+		errMain += err
+		p.advance()
 	}
-	p.advance()
 
-	return expr, err
-
+	return left, errMain
 }
 
 func (p *Parser) parseToken() (ASTNode, string) {
 	token := p.peek()
-	p.advance()
+	//TODO:
+	// p.advance()
 	fmt.Fprintf(os.Stderr, "[DEBUG] [parseToken()]. Token %s\n", token.lexeme)
 	switch token.typeToken {
 	case TRUE:
@@ -174,33 +168,100 @@ func (p *Parser) parseToken() (ASTNode, string) {
 		return StringExpression{token: token}, ""
 	case LEFT_PAREN:
 		p.stack.Push('(')
+		fmt.Fprint(os.Stderr, "[DEBUG] Left_Parent in stack:")
+		fmt.Fprintln(os.Stderr, p.stack.items)
 		expr, err := p.parseGroup()
 		if expr != nil {
 			return GroupExpression{expression: expr}, err
 		} else {
 			return nil, err
 		}
-		// return nil, ""
 	case RIGHT_PAREN:
-		return nil, "[RIGHT PAREN]Error: Unmatched parentheses."
-
+		p.stack.Pop()
+		return nil, "[RIGHT PAREN]Error: Unmatched parentheses.\n"
 	case BANG, MINUS:
 		expr, err := p.parseUnary()
-		return UnaryExpression{expression: expr, operator: token.typeToken}, err
+		return UnaryExpression{expression: expr, operator: token}, err
+	case STAR, SLASH:
+		expr, err := p.parseBinary()
+
+		return BinaryExpression{left: nil, operator: token, right: expr}, err
 	default:
-		fmt.Fprintf(os.Stderr, "[DEBUG] [Parser parseToken()] default. Token %s has not implemented", token.lexeme)
+		fmt.Fprintf(os.Stderr, "[DEBUG] [Parser parseToken()] default. Token %s has not implemented\n", token.lexeme)
 	}
 	return nil, ""
 }
 
 func (p *Parser) parseUnary() (ASTNode, string) {
-	var expr ASTNode
-	var err string
-
-	expr, err = p.parseToken()
-
+	//TODO:
+	p.advance()
+	expr, err := p.parseToken()
 	return expr, err
 }
+
+func (p *Parser) parseBinary() (ASTNode, string) {
+	//TODO:
+	p.advance()
+	right, errRight := p.parseToken()
+	// fmt.Fprintf(os.Stderr, "[DEBUG] Right %s\n", right.String())
+	return right, errRight
+}
+
+func (p *Parser) parseGroup() (ASTNode, string) {
+	p.advance()
+
+	var err string
+	if p.isAtEnd() {
+		err += "Error: Unmatched parentheses."
+		return nil, err
+	}
+	token := p.peek()
+	if token.typeToken == RIGHT_PAREN {
+		//TODO:
+		// p.advance()
+		return nil, "Error: Empty expression."
+	}
+
+	expr, errParseTokens := p.parseTokens()
+	err += errParseTokens
+	if p.isAtEnd() {
+		err += "Error: Unmatched parentheses."
+		return nil, err
+	}
+	// token = p.peek()
+	// if token.typeToken == RIGHT_PAREN {
+	// 	top := p.stack.Pop()
+	// 	if top != '(' {
+	// 		err += "[p.stack.Pop() != '(']Error: Unmatched parentheses."
+	// 		return nil, err
+	// 	}
+
+	// }
+	// fmt.Fprint(os.Stderr, "[DEBUG] AFTER POP() Left_Parent in stack:")
+	// fmt.Fprintln(os.Stderr, p.stack.items)
+	//TODO:
+	// p.advance()
+	return expr, err
+}
+
+// func (p *Parser) parseBinary(left ASTNode) (ASTNode, string) {
+
+// p.previous()
+// var operator Token = p.peek()
+// p.previous()
+// left, errLeft := p.parseToken()
+// p.advance()
+// p.advance()
+// fmt.Fprintf(os.Stderr, "[DEBUG] Left %s\n", left.String())
+// fmt.Fprintf(os.Stderr, "[DEBUG] Operator %s\n", operator.String())
+// return nil, ""
+
+// right, errRight := p.parseToken()
+// fmt.Fprintf(os.Stderr, "[DEBUG] Right %s\n", right.String())
+
+// return right, errRight
+
+// }
 
 func (p *Parser) advance() {
 	p.current = p.current + 1
@@ -210,8 +271,12 @@ func (p *Parser) peek() Token {
 	return p.tokens[p.current]
 }
 
-func (p *Parser) previous() Token {
-	return p.tokens[p.current-1]
+// func (p *Parser) previous() Token {
+// 	return p.tokens[p.current-1]
+// }
+
+func (p *Parser) previous() {
+	p.current = p.current - 1
 }
 
 // func (p *Parser) previous() Token {
@@ -222,6 +287,10 @@ func Parse(tokens []Token) (ASTNode, string) {
 	parser := initParser()
 	parser.tokens = tokens
 	expression, err := parser.parseTokens()
+
+	if !parser.stack.IsEmpty() {
+		return expression, "[p.stack.IsEmpty() ]Error: Unmatched parentheses."
+	}
 	return expression, err
 }
 
