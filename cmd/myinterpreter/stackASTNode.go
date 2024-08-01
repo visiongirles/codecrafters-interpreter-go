@@ -1,18 +1,18 @@
 package main
 
-type Stack struct {
-	items []rune
+type StackASTNode struct {
+	items []ASTNode
 }
 
 // Push добавляет элемент на вершину стека
-func (s *Stack) Push(item rune) {
+func (s *StackASTNode) Push(item ASTNode) {
 	s.items = append(s.items, item)
 }
 
 // Pop удаляет и возвращает элемент с вершины стека
-func (s *Stack) Pop() rune {
+func (s *StackASTNode) Pop() ASTNode {
 	if len(s.items) == 0 {
-		return 0 // возвращаем ноль, если стек пуст
+		return nil // возвращаем ноль, если стек пуст
 	}
 	item := s.items[len(s.items)-1]
 	s.items = s.items[:len(s.items)-1]
@@ -20,14 +20,14 @@ func (s *Stack) Pop() rune {
 }
 
 // IsEmpty проверяет, пуст ли стек
-func (s *Stack) IsEmpty() bool {
+func (s *StackASTNode) IsEmpty() bool {
 	return len(s.items) == 0
 }
 
 // Top возвращает элемент с вершины стека без удаления
-func (s *Stack) Top() rune {
+func (s *StackASTNode) Top() ASTNode {
 	if len(s.items) == 0 {
-		return 0 // возвращаем ноль, если стек пуст
+		return nil // возвращаем ноль, если стек пуст
 	}
 	return s.items[len(s.items)-1]
 }
