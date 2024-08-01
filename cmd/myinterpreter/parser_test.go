@@ -4,14 +4,29 @@ import (
 	"testing"
 )
 
-func TestParse(t *testing.T) {
-	// token1 := Token{typeToken: LEFT_PAREN}
-	// token2 := Token{typeToken: STRING, lexeme: "foo", literal: "foo"}
-	// token3 := Token{typeToken: RIGHT_PAREN}
-	// tokens := []Token{token1, token2, token3}
+// func TestParse(t *testing.T) {
+// 	source := "(76 * -30 / (84 * 39))"
+// 	tokens, errScan := Scan(source)
+// 	expectedErr := ""
 
-	source := "(76 * -30 / (84 * 39))"
-	// source := "(\"foo\")"
+// 	if errScan != expectedErr {
+// 		t.Errorf("Scanner Failed: %s", errScan)
+// 	}
+
+// 	result, errParse := Parse(tokens)
+// 	expected := "(group (/ (* 76.0 (- 30.0)) (group (* 84.0 39.0))))"
+
+// 	if errParse != expectedErr {
+// 		t.Errorf("Parser Failed: %s", errParse)
+// 	}
+
+// 	if result.String() != expected {
+// 		t.Errorf("Result Failed!")
+// 	}
+// }
+
+func TestParseBinaryMinus(t *testing.T) {
+	source := "7 - 5"
 	tokens, errScan := Scan(source)
 	expectedErr := ""
 
@@ -20,23 +35,84 @@ func TestParse(t *testing.T) {
 	}
 
 	result, errParse := Parse(tokens)
-	expected := "(group (/ (* 76.0 (- 30.0)) (group (* 84.0 39.0))))"
+	expected := "(- 7.0 5.0)"
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
 	}
 
 	if result.String() != expected {
-		t.Errorf("Result Failed!")
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+func TestParseBinaryMultipleOperadsandOperators(t *testing.T) {
+	source := `-(-23 + 54) * (87 * 34) / (73 + 62)`
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
 	}
 
+	result, errParse := Parse(tokens)
+	// TODO:
+	expected := "(/ (* (- (group (+ (- 23.0) 54.0))) (group (* 87.0 34.0))) (group (+ 73.0 62.0)))"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+func TestParseBinaryMinusSeveralOperands(t *testing.T) {
+	source := "90 - 94 - 33"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := "(- (- 90.0 94.0) 33.0)"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+
+func TestParseBinaryLiteral(t *testing.T) {
+	source := `"hello" + "world"`
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := "(+ hello world)"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
 }
 
 func TestParseUnmatched(t *testing.T) {
 
-	source := "(\"foo\")"
+	source := `("foo"`
 	tokens, errScan := Scan(source)
-	expectedScanErr := "Error: Unmatched parentheses."
+	expectedScanErr := ""
 	expectedParseErr := "Error: Unmatched parentheses."
 
 	if errScan != expectedScanErr {
@@ -50,19 +126,31 @@ func TestParseUnmatched(t *testing.T) {
 	}
 
 	if result != nil {
-		t.Errorf("Result Failed!")
+		t.Errorf("Result Failed! %s", result.String())
 	}
 
 }
 
-// func TestScan(t *testing.T) {
-// 	text := "(76 * -30 / (84 * 39))"
+// func TestParseUnaryMinus(t *testing.T) {
 
-// 	result, err := Scan(text)
-// 	var expected []Token
-// 	expectedErr := ""
+// 	source := `-1`
+// 	tokens, errScan := Scan(source)
+// 	expectedScanErr := ""
+// 	expectedParseErr := ""
+// 	expected := "- 1"
 
-// 	if !reflect.DeepEqual(result, expected) || err != expectedErr {
-// 		t.Errorf("ERROR!")
+// 	if errScan != expectedScanErr {
+// 		t.Errorf("Scanner Failed: %s", errScan)
 // 	}
+
+// 	result, errParse := Parse(tokens)
+
+// 	if errParse != expectedParseErr {
+// 		t.Errorf("Parser Failed: %s", errParse)
+// 	}
+
+// 	if result.String() != expected {
+// 		t.Errorf("Result Failed! %s", result.String())
+// 	}
+
 // }

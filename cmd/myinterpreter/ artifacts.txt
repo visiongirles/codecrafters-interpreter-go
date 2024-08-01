@@ -1,0 +1,124 @@
+// func (p *Parser) match(tokensTypes ...TokenType) bool {
+// 	for _, tokenType := range tokensTypes {
+// 		if p.check(tokenType) {
+// 			p.advance()
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
+
+// func (p *Parser) check(tokenType TokenType) bool {
+// 	if p.isAtEnd() {
+// 		return false
+// 	}
+// 	return p.peek().typeToken == tokenType
+// }
+
+// func (p *Parser) consume(tokenType TokenType, message string) {
+// 	if p.check(tokenType) {
+// 		p.advance()
+// 		return
+// 	}
+// }
+
+// func (p *Parser) primary() (ASTNode, string) {
+// 	token := p.advance()
+// 	if p.match(FALSE) {
+// 		return FalseExpression{token: token}, ""
+// 	}
+// 	if p.match(TRUE) {
+// 		return TrueExpression{token: token}, ""
+// 	}
+// 	if p.match(NIL) {
+// 		return NilExpression{token: token}, ""
+// 	}
+// 	if p.match(NUMBER) {
+// 		return NumberExpression{token: token}, ""
+// 	}
+// 	if p.match(STRING) {
+// 		return StringExpression{token: token}, ""
+// 	}
+
+// 	if p.match(LEFT_PAREN) {
+// 		expr := expression()
+// 		p.consume(RIGHT_PAREN, "Expect ')' after expression.")
+// 		return GroupExpression{expression: expr}, err
+// 	}
+// }
+
+// func (p *Parser) previous() Token {
+// 	return p.tokens[p.current-1]
+// }
+
+// func (p *Parser) previous() {
+// 	p.current = p.current - 1
+// }
+
+// func (p *Parser) previous() Token {
+// 	return p.tokens[p.current-1]
+// }
+
+// func (p *Parser) parseBinary(left ASTNode) (ASTNode, string) {
+
+// p.previous()
+// var operator Token = p.peek()
+// p.previous()
+// left, errLeft := p.parseToken()
+// p.advance()
+// p.advance()
+// fmt.Fprintf(os.Stderr, "[DEBUG] Left %s\n", left.String())
+// fmt.Fprintf(os.Stderr, "[DEBUG] Operator %s\n", operator.String())
+// return nil, ""
+
+// right, errRight := p.parseToken()
+// fmt.Fprintf(os.Stderr, "[DEBUG] Right %s\n", right.String())
+
+// return right, errRight
+
+// }
+
+// func (p *Parser) parseToken() (ASTNode, string) {
+// 	token := p.peek()
+// 	//TODO: убрать вложенность до parseToken()  на уровень parseTokens()
+// 	// TODO: не по 1 токену парсить, а по паре токенов: левый и оператор
+// 	// p.advance()
+// 	fmt.Fprintf(os.Stderr, "[DEBUG] [parseToken()]. Token %s\n", token.lexeme)
+// 	switch token.typeToken {
+// 	case TRUE:
+// 		return TrueExpression{token: token}, ""
+// 	case FALSE:
+// 		return FalseExpression{token: token}, ""
+// 	case NIL:
+// 		return NilExpression{token: token}, ""
+// 	case NUMBER:
+// 		return NumberExpression{token: token}, ""
+// 	case STRING:
+// 		return StringExpression{token: token}, ""
+// 	case LEFT_PAREN:
+// 		p.stack.Push('(')
+// 		// fmt.Fprint(os.Stderr, "[DEBUG] Left_Parent in stack:")
+// 		// fmt.Fprintln(os.Stderr, p.stack.items)
+// 		expr, err := p.parseGroup()
+// 		if expr != nil {
+// 			return GroupExpression{expression: expr}, err
+// 		} else {
+// 			return nil, err
+// 		}
+// 	case RIGHT_PAREN:
+// 		p.stack.Pop()
+// 		return nil, "[RIGHT PAREN]Error: Unmatched parentheses.\n"
+// 	case BANG, MINUS:
+// 		expr, err := p.parseUnary()
+// 		return UnaryExpression{expression: expr, operator: token}, err
+// 	case STAR, SLASH, PLUS:
+// 		// TODO: убрать условие
+
+// 		expr, err := p.parseBinary()
+// 		return BinaryExpression{left: nil, operator: token, right: expr}, err
+
+// 	default:
+// 		fmt.Fprintf(os.Stderr, "[DEBUG] [Parser parseToken()] default. Token %s has not implemented\n", token.lexeme)
+// 	}
+// 	return nil, ""
+// }
