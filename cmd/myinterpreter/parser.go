@@ -122,7 +122,7 @@ func (p *Parser) parseTokens() (ASTNode, string) {
 main:
 	for !p.isAtEnd() {
 		token := p.peek()
-		fmt.Fprintf(os.Stderr, "[DEBUG] [parseTokens()]. Token %s\n", token.lexeme)
+		fmt.Fprintf(os.Stderr, "[DEBUG] [parseTokens()]. Token: %s\n", token.lexeme)
 		switch token.typeToken {
 		case TRUE:
 			left = TrueExpression{token: token}
@@ -155,7 +155,6 @@ main:
 			if expr != nil {
 				left = GroupExpression{expression: expr}
 			} else {
-				// TODO: p.stuckASTNode ????
 				errMain += err
 				return nil, errMain
 			}
@@ -174,24 +173,19 @@ main:
 		}
 
 		operator := p.peek()
-		fmt.Fprintf(os.Stderr, "[DEBUG] [parseTokens()]. Token %s\n", operator.lexeme)
-		// p.stackASTNodes.Push(operator)
+		fmt.Fprintf(os.Stderr, "[DEBUG] [parseTokens()]. Operator %s\n", operator.lexeme)
 
-		// TODO: проверка на оператор
 		switch operator.typeToken {
 		case STAR, SLASH, PLUS, MINUS:
 			expr, err := p.parseBinary()
-			//TODO:
 
 			if err != "" {
 				errMain += err
 				return nil, errMain
 			}
-			//TODO: second push?!
-			// p.stackASTNodes.Push(expr)
-			// left = BinaryExpression{left: left, operator: operator, right: expr}
-			// left = BinaryExpression{operator: operator, right: expr}
-			p.stackASTNodes.Push(BinaryExpression{operator: operator, right: expr})
+			//p.stackASTNodes.Push(BinaryExpression{left: left, operator: operator, right: expr})
+			left = BinaryExpression{left: left, operator: operator, right: expr}
+			//return expr, errMain
 		}
 
 	}
@@ -209,22 +203,24 @@ func (p *Parser) generateASTTree() ASTNode {
 			p.stackASTNodes.Pop()
 		}
 
+		//if groupExpr, ok := node.(GroupExpression); ok {
+		//	left = GroupExpression{left: left, operator: binaryExpr.operator, right: binaryExpr.right}
+		//	p.stackASTNodes.Pop()
+		//}
 	}
 	return left
 }
 
 func (p *Parser) parseUnary() (ASTNode, string) {
+	operator := p.peek()
 	p.advance()
-	token := p.peek()
 	expr, err := p.parseTokens()
-	return UnaryExpression{expression: expr, operator: token}, err
+	return UnaryExpression{expression: expr, operator: operator}, err
 }
 
 func (p *Parser) parseBinary() (ASTNode, string) {
-	//TODO:
 	p.advance()
 	right, errRight := p.parseTokens()
-	// fmt.Fprintf(os.Stderr, "[DEBUG] Right %s\n", right.String())
 	return right, errRight
 }
 
@@ -266,13 +262,12 @@ func (p *Parser) peek() Token {
 func Parse(tokens []Token) (ASTNode, string) {
 	parser := initParser()
 	parser.tokens = tokens
-	_, err := parser.parseTokens()
-
-	expression := parser.generateASTTree()
+	exp, err := parser.parseTokens()
+	fmt.Print(exp)
+	//expression := parser.generateASTTree()
 
 	if !parser.stackParentheses.IsEmpty() {
-		//TODO: nil или что-то распарсенное?
 		return nil, "Error: Unmatched parentheses."
 	}
-	return expression, err
+	return exp, err
 }

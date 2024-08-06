@@ -40,7 +40,6 @@ func main() {
 		expression, err := handleParseCommand(fileContent)
 		if expression != nil {
 			fmt.Printf("%s\n", expression.String())
-
 		}
 
 		if err != "" {
