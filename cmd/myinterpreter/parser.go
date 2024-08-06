@@ -115,6 +115,24 @@ func (p *Parser) isAtEnd() bool {
 	return p.current >= len(p.tokens)
 }
 
+func (p *Parser) parseLiteral() (ASTNode, string) {
+	token := p.peek()
+	switch token.typeToken {
+	case TRUE:
+		return TrueExpression{token: token}, ""
+	case FALSE:
+		return FalseExpression{token: token}, ""
+	case NIL:
+		return NilExpression{token: token}, ""
+	case NUMBER:
+		return NumberExpression{token: token}, ""
+	case STRING:
+		return StringExpression{token: token}, ""
+	default:
+		return nil, "Error: default case in parseLiteral()"
+	}
+}
+
 func (p *Parser) parseTokens() (ASTNode, string) {
 	var left ASTNode
 	errMain := ""
@@ -124,25 +142,23 @@ main:
 		token := p.peek()
 		fmt.Fprintf(os.Stderr, "[DEBUG] [parseTokens()]. Token: %s\n", token.lexeme)
 		switch token.typeToken {
-		case TRUE:
-			left = TrueExpression{token: token}
-		case FALSE:
-			left = FalseExpression{token: token}
-		case NIL:
-			left = NilExpression{token: token}
-		case NUMBER:
-			left = NumberExpression{token: token}
-		case STRING:
-			left = StringExpression{token: token}
 		case BANG, MINUS:
-			expr, err := p.parseUnary()
-			if err != "" {
+			if left != nil {
+				right, err := p.parseBinary()
+				left = BinaryExpression{left, token, right}
 				errMain += err
-				return nil, errMain
+			} else {
+				expr, err := p.parseUnary()
+				left = expr
+				errMain += err
+
 			}
+
+		case TRUE, FALSE, NIL, NUMBER, STRING:
+			expr, err := p.parseLiteral()
 			left = expr
-			// errMain += err
-		// 	return UnaryExpression{expression: expr, operator: token}, err
+			errMain += err
+
 		case LEFT_PAREN:
 			p.stackParentheses.Push('(')
 			expr, err := p.parseGroup()
@@ -153,7 +169,7 @@ main:
 			}
 
 			if expr != nil {
-				left = GroupExpression{expression: expr}
+				left = expr
 			} else {
 				errMain += err
 				return nil, errMain
@@ -178,16 +194,13 @@ main:
 		switch operator.typeToken {
 		case STAR, SLASH, PLUS, MINUS:
 			expr, err := p.parseBinary()
-
 			if err != "" {
 				errMain += err
 				return nil, errMain
 			}
-			//p.stackASTNodes.Push(BinaryExpression{left: left, operator: operator, right: expr})
 			left = BinaryExpression{left: left, operator: operator, right: expr}
-			//return expr, errMain
+			p.advance() //TODO:
 		}
-
 	}
 	p.stackASTNodes.Push(left)
 	return left, errMain
@@ -202,26 +215,40 @@ func (p *Parser) generateASTTree() ASTNode {
 			left = BinaryExpression{left: left, operator: binaryExpr.operator, right: binaryExpr.right}
 			p.stackASTNodes.Pop()
 		}
-
-		//if groupExpr, ok := node.(GroupExpression); ok {
-		//	left = GroupExpression{left: left, operator: binaryExpr.operator, right: binaryExpr.right}
-		//	p.stackASTNodes.Pop()
-		//}
 	}
 	return left
 }
 
 func (p *Parser) parseUnary() (ASTNode, string) {
+	var right ASTNode
 	operator := p.peek()
+	mainErr := ""
 	p.advance()
-	expr, err := p.parseTokens()
-	return UnaryExpression{expression: expr, operator: operator}, err
+	token := p.peek()
+	if token.typeToken == LEFT_PAREN {
+		right, mainErr = p.parseGroup()
+	} else {
+		right, mainErr = p.parseLiteral()
+	}
+	return UnaryExpression{expression: right, operator: operator}, mainErr
 }
 
 func (p *Parser) parseBinary() (ASTNode, string) {
+	var right ASTNode
+	err := ""
 	p.advance()
-	right, errRight := p.parseTokens()
-	return right, errRight
+	token := p.peek()
+	switch token.typeToken {
+	case LEFT_PAREN:
+
+		right, err = p.parseGroup()
+	case BANG, MINUS:
+		right, err = p.parseUnary()
+	case NUMBER, STRING, NIL, TRUE, FALSE:
+		right, err = p.parseLiteral()
+	}
+	//right, errRight := p.parseTokens()
+	return right, err
 }
 
 func (p *Parser) parseGroup() (ASTNode, string) {
@@ -244,11 +271,8 @@ func (p *Parser) parseGroup() (ASTNode, string) {
 
 	expr, errParseTokens := p.parseTokens()
 	err += errParseTokens
-	// if p.isAtEnd() {
-	// 	err += "Error: Unmatched parentheses."
-	// 	return nil, err
-	// }
-	return expr, err
+
+	return GroupExpression{expression: expr}, err
 }
 
 func (p *Parser) advance() {

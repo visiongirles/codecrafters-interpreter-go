@@ -4,27 +4,6 @@ import (
 	"testing"
 )
 
-// func TestParse(t *testing.T) {
-// 	source := "(76 * -30 / (84 * 39))"
-// 	tokens, errScan := Scan(source)
-// 	expectedErr := ""
-
-// 	if errScan != expectedErr {
-// 		t.Errorf("Scanner Failed: %s", errScan)
-// 	}
-
-// 	result, errParse := Parse(tokens)
-// 	expected := "(group (/ (* 76.0 (- 30.0)) (group (* 84.0 39.0))))"
-
-// 	if errParse != expectedErr {
-// 		t.Errorf("Parser Failed: %s", errParse)
-// 	}
-
-// 	if result.String() != expected {
-// 		t.Errorf("Result Failed!")
-// 	}
-// }
-
 func TestParseBinaryMinus(t *testing.T) {
 	source := "7 - 5"
 	tokens, errScan := Scan(source)
@@ -36,6 +15,26 @@ func TestParseBinaryMinus(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	expected := "(- 7.0 5.0)"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+func TestParseBinaryAndUnary(t *testing.T) {
+	source := "-5 + 9"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := "(+ (- 5.0) 9.0)"
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -65,8 +64,27 @@ func TestParseUnaryMinus(t *testing.T) {
 		t.Errorf("Result Failed! %s\n", result.String())
 	}
 }
+func TestParseDoubleUnaryMinus(t *testing.T) {
+	source := "-(-23 + 5)"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
 
-func TestParseTwoGroupsndUnary(t *testing.T) {
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := "(- (group (+ (- 23.0) 5.0)))"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+func TestParseTwoGroupsAndUnary(t *testing.T) {
 	source := `-("small") / ("talk")`
 	tokens, errScan := Scan(source)
 	expectedErr := ""
@@ -77,7 +95,7 @@ func TestParseTwoGroupsndUnary(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	// TODO:
-	expected := "(/ (group small) (group talk))"
+	expected := "(/ (- (group small)) (group talk))"
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -189,7 +207,6 @@ func TestParseBinaryLiteral(t *testing.T) {
 		t.Errorf("Result Failed! %s\n", result.String())
 	}
 }
-
 func TestParseUnmatched(t *testing.T) {
 
 	source := `("foo"`
@@ -212,27 +229,3 @@ func TestParseUnmatched(t *testing.T) {
 	}
 
 }
-
-// func TestParseUnaryMinus(t *testing.T) {
-
-// 	source := `-1`
-// 	tokens, errScan := Scan(source)
-// 	expectedScanErr := ""
-// 	expectedParseErr := ""
-// 	expected := "- 1"
-
-// 	if errScan != expectedScanErr {
-// 		t.Errorf("Scanner Failed: %s", errScan)
-// 	}
-
-// 	result, errParse := Parse(tokens)
-
-// 	if errParse != expectedParseErr {
-// 		t.Errorf("Parser Failed: %s", errParse)
-// 	}
-
-// 	if result.String() != expected {
-// 		t.Errorf("Result Failed! %s", result.String())
-// 	}
-
-// }
