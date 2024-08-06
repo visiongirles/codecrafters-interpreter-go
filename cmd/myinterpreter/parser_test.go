@@ -45,7 +45,70 @@ func TestParseBinaryMinus(t *testing.T) {
 		t.Errorf("Result Failed! %s\n", result.String())
 	}
 }
-func TestParseBinaryMultipleOperadsandOperators(t *testing.T) {
+func TestParseUnaryMinus(t *testing.T) {
+	source := "- 7"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := "(- 7.0)"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+
+func TestParseTwoGroupsndUnary(t *testing.T) {
+	source := `-("small") / ("talk")`
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	// TODO:
+	expected := "(/ (group small) (group talk))"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! Result.String(): %s\n", result.String())
+	}
+}
+func TestParseTwoGroups(t *testing.T) {
+	source := `("small") / ("talk")`
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	// TODO:
+	expected := "(/ (group small) (group talk))"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! Result.String(): %s\n", result.String())
+	}
+}
+func TestParseBinaryMultipleOperandsAndOperators(t *testing.T) {
 	source := `-(-23 + 54) * (87 * 34) / (73 + 62)`
 	tokens, errScan := Scan(source)
 	expectedErr := ""
@@ -63,7 +126,7 @@ func TestParseBinaryMultipleOperadsandOperators(t *testing.T) {
 	}
 
 	if result.String() != expected {
-		t.Errorf("Result Failed! %s\n", result.String())
+		t.Errorf("Result Failed! Result.String(): %s\n", result.String())
 	}
 }
 func TestParseBinaryMinusSeveralOperands(t *testing.T) {
@@ -86,7 +149,26 @@ func TestParseBinaryMinusSeveralOperands(t *testing.T) {
 		t.Errorf("Result Failed! %s\n", result.String())
 	}
 }
+func TestParseBinaryMinusTwoOperands(t *testing.T) {
+	source := "(90 - 94)"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
 
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := "(group (- 90.0 94.0))"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
 func TestParseBinaryLiteral(t *testing.T) {
 	source := `"hello" + "world"`
 	tokens, errScan := Scan(source)
