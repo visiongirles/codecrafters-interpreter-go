@@ -153,12 +153,10 @@ main:
 				errMain += err
 
 			}
-
 		case TRUE, FALSE, NIL, NUMBER, STRING:
 			expr, err := p.parseLiteral()
 			left = expr
 			errMain += err
-
 		case LEFT_PAREN:
 			p.stackParentheses.Push('(')
 			expr, err := p.parseGroup()
@@ -174,7 +172,6 @@ main:
 				errMain += err
 				return nil, errMain
 			}
-
 		case RIGHT_PAREN:
 			p.stackParentheses.Pop()
 			break main
