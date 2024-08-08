@@ -24,6 +24,30 @@ func TestParseBinaryMinus(t *testing.T) {
 		t.Errorf("Result Failed! %s\n", result.String())
 	}
 }
+func TestParseBinaryMinusNEW(t *testing.T) {
+	source := "7 - 5"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	parser := initParser()
+	parser.tokens = tokens
+
+	result := parser.expression()
+	errParse := ""
+	expected := "(- 7.0 5.0)"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
 func TestParseBinaryAndUnary(t *testing.T) {
 	source := "-5 + 9"
 	tokens, errScan := Scan(source)
@@ -74,6 +98,30 @@ func TestParseDoubleUnaryMinus(t *testing.T) {
 	}
 
 	result, errParse := Parse(tokens)
+	expected := "(- (group (+ (- 23.0) 5.0)))"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+func TestParseDoubleUnaryMinusNEW(t *testing.T) {
+	source := "-(-23 + 5)"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	parser := initParser()
+	parser.tokens = tokens
+
+	result := parser.expression()
+	errParse := ""
 	expected := "(- (group (+ (- 23.0) 5.0)))"
 
 	if errParse != expectedErr {
@@ -136,6 +184,31 @@ func TestParseBinaryMultipleOperandsAndOperators(t *testing.T) {
 	}
 
 	result, errParse := Parse(tokens)
+	// TODO:
+	expected := "(/ (* (- (group (+ (- 23.0) 54.0))) (group (* 87.0 34.0))) (group (+ 73.0 62.0)))"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! Result.String(): %s\n", result.String())
+	}
+}
+func TestParseBinaryMultipleOperandsAndOperatorsNEW(t *testing.T) {
+	source := `-(-23 + 54) * (87 * 34) / (73 + 62)`
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	parser := initParser()
+	parser.tokens = tokens
+
+	result := parser.expression()
+	errParse := ""
 	// TODO:
 	expected := "(/ (* (- (group (+ (- 23.0) 54.0))) (group (* 87.0 34.0))) (group (+ 73.0 62.0)))"
 
