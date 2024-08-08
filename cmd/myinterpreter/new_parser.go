@@ -112,6 +112,7 @@ func (p *Parser) previous() Token {
 func (p *Parser) consume(tokenType TokenType) {
 	if p.check(tokenType) {
 		p.advanceAndReturnToken()
+		p.stackParentheses.Pop()
 		return
 	}
 }

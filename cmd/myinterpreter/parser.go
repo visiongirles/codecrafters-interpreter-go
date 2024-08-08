@@ -110,46 +110,28 @@ func (p *Parser) isAtEnd() bool {
 	return p.current >= len(p.tokens)
 }
 
-func (p *Parser) parseLiteral() (ASTNode, string) {
-	token := p.peek()
-	switch token.typeToken {
-	case TRUE:
-		return TrueExpression{token: token}, ""
-	case FALSE:
-		return FalseExpression{token: token}, ""
-	case NIL:
-		return NilExpression{token: token}, ""
-	case NUMBER:
-		return NumberExpression{token: token}, ""
-	case STRING:
-		return StringExpression{token: token}, ""
-	default:
-		return nil, "Error: default case in parseLiteral()"
-	}
-}
-
-func (p *Parser) parseBinaryNew() (ASTNode, string) {
-	left, leftErr := p.parseUnaryNew()
+func (p *Parser) parseBinary() (ASTNode, string) {
+	left, leftErr := p.parseUnary()
 
 	for p.match(PLUS, MINUS, SLASH, STAR) {
 		operator := p.previous()
-		right, errorRight := p.parseUnaryNew()
+		right, errorRight := p.parseUnary()
 		left = BinaryExpression{left, operator, right}
 		leftErr += errorRight
 	}
 	return left, leftErr
 }
 
-func (p *Parser) parseUnaryNew() (ASTNode, string) {
+func (p *Parser) parseUnary() (ASTNode, string) {
 	if p.match(BANG, MINUS) {
 		operator := p.previous()
-		right, errorRight := p.parseUnaryNew()
+		right, errorRight := p.parseUnary()
 		return UnaryExpression{operator, right}, errorRight
 	}
-	return p.parseLiteralNew()
+	return p.parseLiteral()
 }
 
-func (p *Parser) parseLiteralNew() (ASTNode, string) {
+func (p *Parser) parseLiteral() (ASTNode, string) {
 	token := p.peek()
 
 	if p.match(TRUE) {
@@ -168,6 +150,12 @@ func (p *Parser) parseLiteralNew() (ASTNode, string) {
 		return StringExpression{token: token}, ""
 	}
 	if p.match(LEFT_PAREN) {
+		p.stackParentheses.Push('(')
+		token = p.peek()
+		if token.typeToken == RIGHT_PAREN {
+			//TODO: нужен ли тут advance, чтобы consume правую скобку
+			return nil, "Error: Empty expression."
+		}
 		expr, err := p.parseTokens()
 		p.consume(RIGHT_PAREN)
 		return GroupExpression{expr}, err
@@ -176,78 +164,8 @@ func (p *Parser) parseLiteralNew() (ASTNode, string) {
 }
 
 func (p *Parser) parseTokens() (ASTNode, string) {
-	return p.parseBinaryNew()
+	return p.parseBinary()
 }
-
-//func (p *Parser) parseTokens() (ASTNode, string) {
-//	var left ASTNode
-//	errMain := ""
-//
-//main:
-//	for !p.isAtEnd() {
-//		token := p.peek()
-//		fmt.Fprintf(os.Stderr, "[DEBUG] [parseTokens()]. Token: %s\n", token.lexeme)
-//		switch token.typeToken {
-//		case BANG, MINUS:
-//			if left != nil {
-//				right, err := p.parseBinary()
-//				left = BinaryExpression{left, token, right}
-//				errMain += err
-//			} else {
-//				expr, err := p.parseUnary()
-//				left = expr
-//				errMain += err
-//
-//			}
-//		case TRUE, FALSE, NIL, NUMBER, STRING:
-//			expr, err := p.parseLiteral()
-//			left = expr
-//			errMain += err
-//		case LEFT_PAREN:
-//			p.stackParentheses.Push('(')
-//			expr, err := p.parseGroup()
-//
-//			if err != "" {
-//				errMain += err
-//				return nil, errMain
-//			}
-//
-//			if expr != nil {
-//				left = expr
-//			} else {
-//				errMain += err
-//				return nil, errMain
-//			}
-//		case RIGHT_PAREN:
-//			p.stackParentheses.Pop()
-//			break main
-//		default:
-//			fmt.Fprintf(os.Stderr, "[DEBUG] [Parser parseToken()] default. Token %s has not implemented\n", token.lexeme)
-//		}
-//
-//		p.advance()
-//		if p.isAtEnd() {
-//			p.stackASTNodes.Push(left)
-//			return left, errMain
-//		}
-//
-//		operator := p.peek()
-//		fmt.Fprintf(os.Stderr, "[DEBUG] [parseTokens()]. Operator %s\n", operator.lexeme)
-//
-//		switch operator.typeToken {
-//		case STAR, SLASH, PLUS, MINUS:
-//			expr, err := p.parseBinary()
-//			if err != "" {
-//				errMain += err
-//				return nil, errMain
-//			}
-//			left = BinaryExpression{left: left, operator: operator, right: expr}
-//			p.advance() //TODO:
-//		}
-//	}
-//	p.stackASTNodes.Push(left)
-//	return left, errMain
-//}
 
 func (p *Parser) generateASTTree() ASTNode {
 	left := p.stackASTNodes.Pop()
@@ -260,62 +178,6 @@ func (p *Parser) generateASTTree() ASTNode {
 		}
 	}
 	return left
-}
-
-func (p *Parser) parseUnary() (ASTNode, string) {
-	var right ASTNode
-	operator := p.peek()
-	mainErr := ""
-	p.advance()
-	token := p.peek()
-	if token.typeToken == LEFT_PAREN {
-		right, mainErr = p.parseGroup()
-	} else {
-		right, mainErr = p.parseLiteral()
-	}
-	return UnaryExpression{expression: right, operator: operator}, mainErr
-}
-
-func (p *Parser) parseBinary() (ASTNode, string) {
-	var right ASTNode
-	err := ""
-	p.advance()
-	token := p.peek()
-	switch token.typeToken {
-	case LEFT_PAREN:
-
-		right, err = p.parseGroup()
-	case BANG, MINUS:
-		right, err = p.parseUnary()
-	case NUMBER, STRING, NIL, TRUE, FALSE:
-		right, err = p.parseLiteral()
-	}
-	//right, errRight := p.parseTokens()
-	return right, err
-}
-
-func (p *Parser) parseGroup() (ASTNode, string) {
-	p.advance()
-
-	var err string
-
-	// Сразу конец выражения, есть только левая скобка
-	if p.isAtEnd() {
-		err += "[parseGroup(), condition: p.isAtEnd()]Error: Unmatched parentheses."
-		return nil, err
-	}
-	token := p.peek()
-
-	// сразу следом за левой скобкой идет правая скобка - пустое выражение
-	if token.typeToken == RIGHT_PAREN {
-		//TODO: нужен ли тут advance, чтобы consume правую скобку
-		return nil, "Error: Empty expression."
-	}
-
-	expr, errParseTokens := p.parseTokens()
-	err += errParseTokens
-
-	return GroupExpression{expression: expr}, err
 }
 
 func (p *Parser) advance() {
