@@ -66,6 +66,7 @@ func handleTokenizeCommand(fileContent []byte) ([]Token, string) {
 func handleParseCommand(fileContent []byte) (ASTNode, string) {
 	tokens, _ := handleTokenizeCommand(fileContent)
 	expression, err := Parse(tokens)
+	fmt.Println(expression)
 	// result := expressionToString(expression)
 	return expression, err
 }

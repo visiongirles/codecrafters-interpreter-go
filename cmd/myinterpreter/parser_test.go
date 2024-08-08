@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -10,16 +11,16 @@ func TestParseBinaryMinus(t *testing.T) {
 	expectedErr := ""
 
 	if errScan != expectedErr {
-		t.Errorf("Scanner Failed: %s", errScan)
+		t.Errorf("Scanner Failed: %s\n", errScan)
 	}
 
 	result, errParse := Parse(tokens)
 	expected := "(- 7.0 5.0)"
 
 	if errParse != expectedErr {
-		t.Errorf("Parser Failed: %s", errParse)
+		t.Errorf("Parser Failed: %s\n", errParse)
 	}
-
+	fmt.Println(result)
 	if result.String() != expected {
 		t.Errorf("Result Failed! %s\n", result.String())
 	}
@@ -39,6 +40,7 @@ func TestParseBinaryMinusNEW(t *testing.T) {
 	result := parser.expression()
 	errParse := ""
 	expected := "(- 7.0 5.0)"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -59,6 +61,7 @@ func TestParseBinaryAndUnary(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	expected := "(+ (- 5.0) 9.0)"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -79,6 +82,7 @@ func TestParseUnaryMinus(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	expected := "(- 7.0)"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -99,6 +103,7 @@ func TestParseDoubleUnaryMinus(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	expected := "(- (group (+ (- 23.0) 5.0)))"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -121,6 +126,9 @@ func TestParseDoubleUnaryMinusNEW(t *testing.T) {
 	parser.tokens = tokens
 
 	result := parser.expression()
+
+	fmt.Println(result)
+
 	errParse := ""
 	expected := "(- (group (+ (- 23.0) 5.0)))"
 
@@ -144,6 +152,7 @@ func TestParseTwoGroupsAndUnary(t *testing.T) {
 	result, errParse := Parse(tokens)
 	// TODO:
 	expected := "(/ (- (group small)) (group talk))"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -163,7 +172,8 @@ func TestParseTwoGroups(t *testing.T) {
 	}
 
 	result, errParse := Parse(tokens)
-	// TODO:
+	fmt.Println(result)
+
 	expected := "(/ (group small) (group talk))"
 
 	if errParse != expectedErr {
@@ -184,7 +194,8 @@ func TestParseBinaryMultipleOperandsAndOperators(t *testing.T) {
 	}
 
 	result, errParse := Parse(tokens)
-	// TODO:
+	fmt.Println(result)
+
 	expected := "(/ (* (- (group (+ (- 23.0) 54.0))) (group (* 87.0 34.0))) (group (+ 73.0 62.0)))"
 
 	if errParse != expectedErr {
@@ -209,7 +220,7 @@ func TestParseBinaryMultipleOperandsAndOperatorsNEW(t *testing.T) {
 
 	result := parser.expression()
 	errParse := ""
-	// TODO:
+	fmt.Println(result)
 	expected := "(/ (* (- (group (+ (- 23.0) 54.0))) (group (* 87.0 34.0))) (group (+ 73.0 62.0)))"
 
 	if errParse != expectedErr {
@@ -231,6 +242,33 @@ func TestParseBinaryMinusSeveralOperands(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	expected := "(- (- 90.0 94.0) 33.0)"
+	fmt.Println(result)
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s", errParse)
+	}
+
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
+func TestParseBinaryMinusSeveralOperandsNEW(t *testing.T) {
+	source := "90 - 94 - 33"
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s", errScan)
+	}
+
+	parser := initParser()
+	parser.tokens = tokens
+
+	result := parser.expression()
+	errParse := ""
+	fmt.Println(result)
+	expected := "(- (- 90.0 94.0) 33.0)"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -251,6 +289,7 @@ func TestParseBinaryMinusTwoOperands(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	expected := "(group (- 90.0 94.0))"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -271,6 +310,7 @@ func TestParseBinaryLiteral(t *testing.T) {
 
 	result, errParse := Parse(tokens)
 	expected := "(+ hello world)"
+	fmt.Println(result)
 
 	if errParse != expectedErr {
 		t.Errorf("Parser Failed: %s", errParse)
@@ -292,6 +332,7 @@ func TestParseUnmatched(t *testing.T) {
 	}
 
 	result, errParse := Parse(tokens)
+	fmt.Println(result)
 
 	if errParse != expectedParseErr {
 		t.Errorf("Parser Failed: %s", errParse)
