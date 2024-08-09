@@ -115,6 +115,10 @@ func (p *Parser) parseBinary() (ASTNode, string) {
 
 	for p.match(PLUS, MINUS, SLASH, STAR, LESS, GREATER, LESS_EQUAL, GREATER_EQUAL, BANG_EQUAL, EQUAL_EQUAL) {
 		operator := p.previous()
+
+		if p.isAtEnd() {
+			return nil, "Error: Expect expression"
+		}
 		right, errorRight := p.parseUnary()
 		left = BinaryExpression{left, operator, right}
 		leftErr += errorRight
