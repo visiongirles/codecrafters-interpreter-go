@@ -5,6 +5,27 @@ import (
 	"testing"
 )
 
+func TestEvaluateDoubleBang(t *testing.T) {
+	source := `(!!37)`
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s\n", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := "true"
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s\n", errParse)
+	}
+	//fmt.Println(result)
+
+	if result.Evaluate().String() != expected {
+		t.Errorf("Result Failed! %s\n", result.Evaluate().String())
+	}
+}
 func TestSyntaxBinaryError(t *testing.T) {
 	source := `(76 +)`
 	tokens, errScan := Scan(source)

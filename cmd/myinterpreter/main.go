@@ -53,7 +53,8 @@ func main() {
 		}
 
 		if expression != nil {
-			fmt.Printf("%s\n", expression.Evaluate())
+			value := expression.Evaluate()
+			fmt.Printf("%s\n", value.String())
 		}
 	default:
 		fmt.Fprintf(os.Stderr, "[DEBUG] Unknown command: %s\n", command)
