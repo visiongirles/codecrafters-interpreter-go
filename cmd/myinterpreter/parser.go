@@ -95,7 +95,7 @@ func (n GroupExpression) String() string {
 	return "(group " + n.expression.String() + ")"
 }
 func (n GroupExpression) Evaluate() string {
-	return "(group " + n.expression.String() + ")"
+	return n.expression.Evaluate()
 }
 
 type UnaryExpression struct {
