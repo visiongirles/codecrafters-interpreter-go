@@ -113,7 +113,7 @@ func (p *Parser) isAtEnd() bool {
 func (p *Parser) parseBinary() (ASTNode, string) {
 	left, leftErr := p.parseUnary()
 
-	for p.match(PLUS, MINUS, SLASH, STAR) {
+	for p.match(PLUS, MINUS, SLASH, STAR, LESS, GREATER, LESS_EQUAL, GREATER_EQUAL, BANG_EQUAL, EQUAL_EQUAL) {
 		operator := p.previous()
 		right, errorRight := p.parseUnary()
 		left = BinaryExpression{left, operator, right}
