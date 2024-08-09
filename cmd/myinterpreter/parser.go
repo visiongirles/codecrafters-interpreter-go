@@ -143,8 +143,29 @@ func (n BinaryExpression) String() string {
 	return "(" + n.operator.lexeme + " " + n.left.String() + " " + n.right.String() + ")"
 }
 
+func calc(l Value, r Value, operator Token) NumberValue {
+	left := l.(NumberValue)
+	right := r.(NumberValue)
+
+	switch operator.typeToken {
+	case PLUS:
+		left = NumberValue{left.value + right.value}
+	case MINUS:
+		left = NumberValue{left.value - right.value}
+	case SLASH:
+		left = NumberValue{left.value / right.value}
+	case STAR:
+		left = NumberValue{left.value * right.value}
+
+	}
+	return left
+}
+
 func (n BinaryExpression) Evaluate() Value {
-	return n.Evaluate() // TODO: написать реализацию
+	left := n.left.Evaluate()
+	right := n.right.Evaluate()
+	left = calc(left, right, n.operator)
+	return left // TODO: написать реализацию
 }
 
 func (n UnaryExpression) String() string {
@@ -184,16 +205,6 @@ func (n UnaryExpression) Evaluate() Value {
 	//case BANG:
 	//}
 }
-
-//type Primitive int
-
-//func (p Primitive) String() string {
-//	return [...]string{
-//		"nil",
-//		"true",
-//		"false",
-//	}[p]
-//}
 
 func initParser() Parser {
 	return Parser{
@@ -264,23 +275,6 @@ func (p *Parser) parseLiteral() (ASTNode, string) {
 
 func (p *Parser) parseTokens() (ASTNode, string) {
 	return p.parseBinary()
-}
-
-func (p *Parser) generateASTTree() ASTNode {
-	left := p.stackASTNodes.Pop()
-	for !p.stackASTNodes.IsEmpty() {
-		node := p.stackASTNodes.Pop()
-
-		if binaryExpr, ok := node.(BinaryExpression); ok {
-			left = BinaryExpression{left: left, operator: binaryExpr.operator, right: binaryExpr.right}
-			p.stackASTNodes.Pop()
-		}
-	}
-	return left
-}
-
-func (p *Parser) advance() {
-	p.current = p.current + 1
 }
 
 func (p *Parser) peek() Token {

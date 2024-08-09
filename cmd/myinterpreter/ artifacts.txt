@@ -122,3 +122,17 @@
 // 	}
 // 	return nil, ""
 // }
+
+
+func (p *Parser) generateASTTree() ASTNode {
+	left := p.stackASTNodes.Pop()
+	for !p.stackASTNodes.IsEmpty() {
+		node := p.stackASTNodes.Pop()
+
+		if binaryExpr, ok := node.(BinaryExpression); ok {
+			left = BinaryExpression{left: left, operator: binaryExpr.operator, right: binaryExpr.right}
+			p.stackASTNodes.Pop()
+		}
+	}
+	return left
+}
