@@ -1,5 +1,7 @@
 package main
 
+import "strings"
+
 type Parser struct {
 	tokens           []Token
 	current          int
@@ -12,6 +14,7 @@ type NodeType string
 // https://gobyexample.com/interfaces
 type ASTNode interface {
 	String() string
+	Evaluate() string
 	// Type()
 }
 
@@ -30,12 +33,23 @@ type NumberExpression struct {
 func (n NumberExpression) String() string {
 	return n.token.literal
 }
+func (n NumberExpression) Evaluate() string {
+	number := n.token.literal
+	if strings.Contains(number, ".") {
+		number = strings.TrimRight(number, "0") // Удаляем нули справа
+		number = strings.TrimRight(number, ".") // Удаляем точку, если все числа после нее были нулями
+	}
+	return number
+}
 
 type StringExpression struct {
 	token Token
 }
 
 func (n StringExpression) String() string {
+	return n.token.literal
+}
+func (n StringExpression) Evaluate() string {
 	return n.token.literal
 }
 
@@ -47,11 +61,18 @@ func (n TrueExpression) String() string {
 	return n.token.lexeme
 }
 
+func (n TrueExpression) Evaluate() string {
+	return n.token.lexeme
+}
+
 type FalseExpression struct {
 	token Token
 }
 
 func (n FalseExpression) String() string {
+	return n.token.lexeme
+}
+func (n FalseExpression) Evaluate() string {
 	return n.token.lexeme
 }
 
@@ -62,12 +83,18 @@ type NilExpression struct {
 func (n NilExpression) String() string {
 	return n.token.lexeme
 }
+func (n NilExpression) Evaluate() string {
+	return n.token.lexeme
+}
 
 type GroupExpression struct {
 	expression ASTNode
 }
 
 func (n GroupExpression) String() string {
+	return "(group " + n.expression.String() + ")"
+}
+func (n GroupExpression) Evaluate() string {
 	return "(group " + n.expression.String() + ")"
 }
 
@@ -86,7 +113,14 @@ func (n BinaryExpression) String() string {
 	return "(" + n.operator.lexeme + " " + n.left.String() + " " + n.right.String() + ")"
 }
 
+func (n BinaryExpression) Evaluate() string {
+	return "(" + n.operator.lexeme + " " + n.left.String() + " " + n.right.String() + ")"
+}
+
 func (n UnaryExpression) String() string {
+	return "(" + n.operator.lexeme + " " + n.expression.String() + ")"
+}
+func (n UnaryExpression) Evaluate() string {
 	return "(" + n.operator.lexeme + " " + n.expression.String() + ")"
 }
 
