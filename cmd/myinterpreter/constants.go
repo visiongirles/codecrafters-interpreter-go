@@ -28,4 +28,5 @@ const (
 const (
 	tokenize = "tokenize"
 	parse    = "parse"
+	evaluate = "evaluate"
 )

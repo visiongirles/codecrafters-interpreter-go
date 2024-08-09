@@ -35,7 +35,6 @@ func main() {
 
 			os.Exit(SyntaxError)
 		}
-
 	case parse:
 		expression, err := handleParseCommand(fileContent)
 		if err != "" {
@@ -46,7 +45,16 @@ func main() {
 		if expression != nil {
 			fmt.Printf("%s\n", expression.String())
 		}
+	case evaluate:
+		expression, err := handleEvaluateCommand(fileContent)
+		if err != "" {
+			PrintErrors(err)
+			os.Exit(SyntaxError)
+		}
 
+		if expression != nil {
+			fmt.Printf("%s\n", expression.String())
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "[DEBUG] Unknown command: %s\n", command)
 		os.Exit(InputError)
@@ -70,6 +78,21 @@ func handleParseCommand(fileContent []byte) (ASTNode, string) {
 		return nil, errScanner
 	} else {
 		expression, errParser := Parse(tokens)
+		return expression, errParser
+	}
+
+}
+
+func handleEvaluateCommand(fileContent []byte) (ASTNode, string) {
+	tokens, errScanner := handleTokenizeCommand(fileContent)
+	if errScanner != "" {
+		return nil, errScanner
+	} else {
+		expression, errParser := Parse(tokens)
+		if errParser != "" {
+			return nil, errParser
+		}
+
 		return expression, errParser
 	}
 
