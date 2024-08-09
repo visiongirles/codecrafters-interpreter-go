@@ -109,7 +109,7 @@ func (s *Scanner) scanToken() {
 }
 
 func (s *Scanner) number() {
-	for isDigit((s.peek())) {
+	for isDigit(s.peek()) {
 		s.advance()
 	}
 

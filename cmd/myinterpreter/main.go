@@ -64,11 +64,14 @@ func handleTokenizeCommand(fileContent []byte) ([]Token, string) {
 }
 
 func handleParseCommand(fileContent []byte) (ASTNode, string) {
-	tokens, _ := handleTokenizeCommand(fileContent)
-	expression, err := Parse(tokens)
-	//fmt.Println(expression)
-	// result := expressionToString(expression)
-	return expression, err
+	tokens, errScanner := handleTokenizeCommand(fileContent)
+	if errScanner != "" {
+		return nil, errScanner
+	} else {
+		expression, errParser := Parse(tokens)
+		return expression, errParser
+	}
+
 }
 
 // func expressionToString(expression LiteralExpression) string {

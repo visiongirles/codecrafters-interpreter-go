@@ -5,6 +5,26 @@ import (
 	"testing"
 )
 
+func TestSyntaxError(t *testing.T) {
+	source := `"foo`
+	tokens, errScan := Scan(source)
+	expectedErr := ""
+
+	if errScan != expectedErr {
+		t.Errorf("Scanner Failed: %s\n", errScan)
+	}
+
+	result, errParse := Parse(tokens)
+	expected := ""
+
+	if errParse != expectedErr {
+		t.Errorf("Parser Failed: %s\n", errParse)
+	}
+	fmt.Println(result)
+	if result.String() != expected {
+		t.Errorf("Result Failed! %s\n", result.String())
+	}
+}
 func TestParseBinaryMinus(t *testing.T) {
 	source := "7 - 5"
 	tokens, errScan := Scan(source)
