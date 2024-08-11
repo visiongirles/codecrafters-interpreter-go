@@ -145,27 +145,30 @@ func (n BinaryExpression) String() string {
 
 func calc(l Value, r Value, operator Token) Value {
 
-	left, okLeft := l.(NumberValue)
-	right, okRight := r.(NumberValue)
-	if okLeft && okRight {
+	leftNumber, okLeftNumber := l.(NumberValue)
+	rightNumber, okRightNumber := r.(NumberValue)
+	if okLeftNumber && okRightNumber {
 		switch operator.typeToken {
-
 		case PLUS:
-			return NumberValue{left.value + right.value}
+			return NumberValue{leftNumber.value + rightNumber.value}
 		case MINUS:
-			return NumberValue{left.value - right.value}
+			return NumberValue{leftNumber.value - rightNumber.value}
 		case SLASH:
-			return NumberValue{left.value / right.value}
+			return NumberValue{leftNumber.value / rightNumber.value}
 		case STAR:
-			return NumberValue{left.value * right.value}
+			return NumberValue{leftNumber.value * rightNumber.value}
 		case LESS:
-			return BooleanValue{left.value < right.value}
+			return BooleanValue{leftNumber.value < rightNumber.value}
 		case LESS_EQUAL:
-			return BooleanValue{left.value <= right.value}
+			return BooleanValue{leftNumber.value <= rightNumber.value}
 		case GREATER:
-			return BooleanValue{left.value > right.value}
+			return BooleanValue{leftNumber.value > rightNumber.value}
 		case GREATER_EQUAL:
-			return BooleanValue{left.value >= right.value}
+			return BooleanValue{leftNumber.value >= rightNumber.value}
+		case EQUAL_EQUAL:
+			return BooleanValue{leftNumber.value == rightNumber.value}
+		case BANG_EQUAL:
+			return BooleanValue{leftNumber.value != rightNumber.value}
 		}
 	}
 
@@ -173,11 +176,26 @@ func calc(l Value, r Value, operator Token) Value {
 	rightString, okRightString := r.(StringValue)
 
 	if okLeftString && okRightString {
-		return StringValue{leftString.value + rightString.value}
+		switch operator.typeToken {
+		case PLUS:
+			return StringValue{leftString.value + rightString.value}
+		case EQUAL_EQUAL:
+			return BooleanValue{leftString.value == rightString.value}
+		case BANG_EQUAL:
+			return BooleanValue{leftString.value != rightString.value}
+		}
+	}
+
+	if okLeftNumber && okRightString || okLeftString && okRightNumber {
+		switch operator.typeToken {
+		case EQUAL_EQUAL:
+			return BooleanValue{false}
+		case BANG_EQUAL:
+			return BooleanValue{true}
+		}
 	}
 
 	return NilValue{}
-
 }
 
 func (n BinaryExpression) Evaluate() Value {
