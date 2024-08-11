@@ -184,7 +184,8 @@ func calc(l Value, r Value, operator Token) Value {
 			return BooleanValue{leftString.value == rightString.value}
 		case BANG_EQUAL:
 			return BooleanValue{leftString.value != rightString.value}
-
+		default:
+			os.Exit(70)
 		}
 	}
 
