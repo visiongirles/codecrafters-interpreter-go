@@ -193,7 +193,7 @@ func calc(l Value, r Value, operator Token) Value {
 		}
 	}
 
-	if okLeftNumber && okRightString || okLeftString && okRightNumber || okLeftNumber && okRightBool || okLeftBool && okLeftNumber || okLeftString && okRightBool || okLeftBool && okRightString {
+	if okLeftNumber && okRightString || okLeftString && okRightNumber || okLeftNumber && okRightBool || okLeftBool && okRightNumber || okLeftString && okRightBool || okLeftBool && okRightString {
 		switch operator.typeToken {
 		case EQUAL_EQUAL:
 			return BooleanValue{false}
