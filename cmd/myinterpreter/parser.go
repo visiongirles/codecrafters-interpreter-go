@@ -143,22 +143,33 @@ func (n BinaryExpression) String() string {
 	return "(" + n.operator.lexeme + " " + n.left.String() + " " + n.right.String() + ")"
 }
 
-func calc(l Value, r Value, operator Token) NumberValue {
-	left := l.(NumberValue)
-	right := r.(NumberValue)
+func calc(l Value, r Value, operator Token) Value {
 
-	switch operator.typeToken {
-	case PLUS:
-		left = NumberValue{left.value + right.value}
-	case MINUS:
-		left = NumberValue{left.value - right.value}
-	case SLASH:
-		left = NumberValue{left.value / right.value}
-	case STAR:
-		left = NumberValue{left.value * right.value}
+	left, okLeft := l.(NumberValue)
+	right, okRight := r.(NumberValue)
 
+	if okLeft && okRight {
+		switch operator.typeToken {
+		case PLUS:
+			return NumberValue{left.value + right.value}
+		case MINUS:
+			return NumberValue{left.value - right.value}
+		case SLASH:
+			return NumberValue{left.value / right.value}
+		case STAR:
+			return NumberValue{left.value * right.value}
+		}
 	}
-	return left
+
+	leftString, okLeftString := l.(StringValue)
+	rightString, okRightString := r.(StringValue)
+
+	if okLeftString && okRightString {
+		return StringValue{leftString.value + rightString.value}
+	}
+
+	return NilValue{}
+
 }
 
 func (n BinaryExpression) Evaluate() Value {
