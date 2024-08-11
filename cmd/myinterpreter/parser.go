@@ -199,6 +199,20 @@ func calc(l Value, r Value, operator Token) Value {
 		}
 	}
 
+	leftBool, okLeftBool := l.(BooleanValue)
+	rightBool, okRightBool := r.(BooleanValue)
+
+	if okLeftBool && okRightBool {
+		switch operator.typeToken {
+		case EQUAL_EQUAL:
+			return BooleanValue{leftBool.value == rightBool.value}
+		case BANG_EQUAL:
+			return BooleanValue{leftBool.value != rightBool.value}
+		default:
+			os.Exit(70)
+		}
+	}
+
 	return NilValue{}
 }
 
