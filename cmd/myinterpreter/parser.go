@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -213,6 +214,13 @@ func (n UnaryExpression) Evaluate() Value {
 
 	switch n.operator.typeToken {
 	case MINUS:
+
+		_, okRightNumber := right.(NumberValue)
+		if !okRightNumber {
+			os.Exit(70)
+			//return NilExpression{} // TODO: вернуть ошибку
+		}
+
 		switch v := right.(type) {
 		case NumberValue:
 			right = NumberValue{-v.value}
