@@ -147,9 +147,9 @@ func calc(l Value, r Value, operator Token) Value {
 
 	left, okLeft := l.(NumberValue)
 	right, okRight := r.(NumberValue)
-
 	if okLeft && okRight {
 		switch operator.typeToken {
+
 		case PLUS:
 			return NumberValue{left.value + right.value}
 		case MINUS:
@@ -158,6 +158,14 @@ func calc(l Value, r Value, operator Token) Value {
 			return NumberValue{left.value / right.value}
 		case STAR:
 			return NumberValue{left.value * right.value}
+		case LESS:
+			return BooleanValue{left.value < right.value}
+		case LESS_EQUAL:
+			return BooleanValue{left.value <= right.value}
+		case GREATER:
+			return BooleanValue{left.value > right.value}
+		case GREATER_EQUAL:
+			return BooleanValue{left.value >= right.value}
 		}
 	}
 

@@ -201,6 +201,7 @@ func (s *Scanner) addTokenFloat(tokenType TokenType, lexeme string) {
 	floatValue, err := strconv.ParseFloat(lexeme, 64)
 	if err != nil {
 		s.error += "[Error]: Float parse error"
+		s.error += "[Error]: Float parse error"
 	} else {
 		str := strconv.FormatFloat(floatValue, 'f', -1, 64)
 		literal := str
