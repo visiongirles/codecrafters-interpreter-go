@@ -148,6 +148,13 @@ func calc(l Value, r Value, operator Token) Value {
 
 	leftNumber, okLeftNumber := l.(NumberValue)
 	rightNumber, okRightNumber := r.(NumberValue)
+
+	leftString, okLeftString := l.(StringValue)
+	rightString, okRightString := r.(StringValue)
+
+	leftBool, okLeftBool := l.(BooleanValue)
+	rightBool, okRightBool := r.(BooleanValue)
+
 	if okLeftNumber && okRightNumber {
 		switch operator.typeToken {
 		case PLUS:
@@ -173,9 +180,6 @@ func calc(l Value, r Value, operator Token) Value {
 		}
 	}
 
-	leftString, okLeftString := l.(StringValue)
-	rightString, okRightString := r.(StringValue)
-
 	if okLeftString && okRightString {
 		switch operator.typeToken {
 		case PLUS:
@@ -189,7 +193,7 @@ func calc(l Value, r Value, operator Token) Value {
 		}
 	}
 
-	if okLeftNumber && okRightString || okLeftString && okRightNumber {
+	if okLeftNumber && okRightString || okLeftString && okRightNumber || okLeftNumber && okRightBool || okLeftBool && okLeftNumber || okLeftString && okRightBool || okLeftBool && okRightString {
 		switch operator.typeToken {
 		case EQUAL_EQUAL:
 			return BooleanValue{false}
@@ -199,9 +203,6 @@ func calc(l Value, r Value, operator Token) Value {
 			os.Exit(70)
 		}
 	}
-
-	leftBool, okLeftBool := l.(BooleanValue)
-	rightBool, okRightBool := r.(BooleanValue)
 
 	if okLeftBool && okRightBool {
 		switch operator.typeToken {
